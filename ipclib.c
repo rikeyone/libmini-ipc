@@ -290,6 +290,7 @@ int ipclib_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *repl
 {
 	int bytes_read;
 	struct ipc_lib *ipc = ipclib;
+	struct timespec expire_time;
 	char path[MSG_QUEUE_NAME_SIZE+1] = {0};
 	mqd_t mqd;
 
@@ -321,10 +322,26 @@ int ipclib_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *repl
 
 	/*
 	* block wait for reply signal from receive thread
+	* wait reply 3 second as timeout
 	*/
 	pthread_mutex_lock(&ipc->lock);
 	while(ipc->reply.type != msg->type + MSG_TYPE_REPLY_BASE){
-		pthread_cond_wait(&ipc->condition, &ipc->lock);
+		clock_gettime(CLOCK_REALTIME, &expire_time);
+		expire_time.tv_sec += 3;
+		if (pthread_cond_timedwait(&ipc->condition,
+					&ipc->lock, &expire_time) < 0) {
+			/*
+			 * Handle errno as a fault except EINTR
+			 */
+			if (errno == EINTR) {
+				continue;
+			} else {
+				pr_err("pthread_cond_timedwait fail, %s\n",
+						strerror(errno));
+				pthread_mutex_unlock(&ipc->lock);
+				return -1;
+			}
+		}
 	}
 
 	/*
