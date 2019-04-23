@@ -27,4 +27,4 @@ set these environment variables to the right cross compile tools.
 
 # Usage
 
-The API interface can be seen in **include** directory. You should include the .h in it and compile your applications with -lsystem -lrt -lpthread and -L{MiniIPCLIB}. You can see the sample code in samples directory.
+The API interface can be seen in **include** directory. You should include the .h in it and compile your applications with '-lmini-ipc -lrt -lpthread' and '-L{MiniIPCLIB}'. You can see the sample code in samples directory.

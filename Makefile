@@ -4,7 +4,7 @@ CC=gcc
 STRIP=strip
 
 CFLAGS= -g -Os -Wall  -I./include/ -I. -L.
-LDFLAGS= -lpthread -lrt -lsystem
+LDFLAGS= -lpthread -lrt -lmini-ipc
 
 LIB_CFLAGS= -c -g -fPIC -Os -Wall -I./include/ -I.
 LIB_LDFLAGS= -shared -lpthread -lrt 
@@ -14,7 +14,7 @@ LIB_LDFLAGS= -shared -lpthread -lrt
 LIBDIR = .
 LIBSRC := $(wildcard $(LIBDIR)/*.c)
 LIBOBJ := $(patsubst %.c,%.o,$(LIBSRC))
-LIBSO = libsystem.so
+LIBSO = libmini-ipc.so
 
 SAMPLE = ./samples
 SAMPLESRC := $(wildcard $(SAMPLE)/*.c)
