@@ -32,7 +32,25 @@ export "C" {
 #include <signal.h>
 
 typedef void (*sigfunc)(int signo);
+
+/*
+ * set_signal_thread - create a thread to handle signal
+ * @func: signal handler set by caller.
+ *
+ * NOTE:
+ * This function must be called before any new thread
+ * is created.
+ *
+ * This function can handle all signals except:
+ * SIGKILL,SIGSTOP,SIGFPE,SIGILL,SIGSEGV,SIGBUS
+ * these signals above will doing the default handler.
+ * */
 void set_signal_thread(sigfunc func);
+
+/*
+ * set_signal - set process signal handler by sigaction
+ * @func: signal handler set by caller.
+ */
 int set_signal(int signo, sigfunc func);
 
 #endif //__MINIOS_SIGNAL_H__
