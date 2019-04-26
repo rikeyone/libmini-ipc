@@ -40,7 +40,7 @@
 #include "timer.h"
 
 struct ipc_lib {
-	char name[MSG_QUEUE_NAME_SIZE+1];
+	char name[MSG_QUEUE_NAME_SIZE];
 	char buf[MSG_QUEUE_MAX_SIZE];
 	mqd_t mqd;
 	pthread_t tid;
@@ -269,7 +269,7 @@ static int ipclib_watchdog_remove(void)
 */
 int ipclib_send_msg_async(char *name, struct ipc_msg *msg)
 {
-	char path[MSG_QUEUE_NAME_SIZE+1] = {0};
+	char path[MSG_QUEUE_NAME_SIZE] = {0};
 	mqd_t mqd;
 
 	snprintf(path, MSG_QUEUE_NAME_SIZE, "/%s", name);
@@ -291,7 +291,7 @@ int ipclib_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *repl
 	int bytes_read;
 	struct ipc_lib *ipc = ipclib;
 	struct timespec expire_time;
-	char path[MSG_QUEUE_NAME_SIZE+1] = {0};
+	char path[MSG_QUEUE_NAME_SIZE] = {0};
 	mqd_t mqd;
 
 	/*
