@@ -8,6 +8,7 @@
 #include "siglib.h"
 #include "debug.h"
 #include "ipclib.h"
+#include "daemon.h"
 
 static void signal_handler(int signo)
 {
@@ -41,6 +42,8 @@ void app_msg_handler(void *data)
 int main(int argc, char *argv[])
 {
 	int ret;
+
+	daemon_init(argv[1]);
 
 	/*
 	 * set_signal_thread must be called
