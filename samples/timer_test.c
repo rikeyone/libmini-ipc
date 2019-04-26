@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 #include "timer.h"
 #include "debug.h"
 
@@ -18,7 +20,8 @@ int main()
 	timer_init(&timer, timer_callback, NULL);
 	timer_start(&timer, ONE_SECOND_US, 0);
 
-	read(STDIN_FILENO, buf, 10);
+	if (read(STDIN_FILENO, buf, 10) < 0)
+		err_exit("read error,%s\n", strerror(errno));
 	pr_info("read returns\n");
 
 	return 0;

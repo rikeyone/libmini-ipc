@@ -4,9 +4,23 @@
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
+#include <signal.h>
+#include "siglib.h"
 #include "debug.h"
 #include "ipclib.h"
 
+static void signal_handler(int signo)
+{
+	switch (signo) {
+	case SIGINT:
+	case SIGTERM:
+		pr_info("signal received:%d\n", signo);
+		ipclib_stop_loop();
+		break;
+	default:
+		break;
+	}
+}
 
 void app_msg_handler(void *data)
 {
@@ -28,6 +42,12 @@ int main(int argc, char *argv[])
 {
 	int ret;
 
+	/*
+	 * set_signal_thread must be called
+	 * before any new thread is created.
+	 * */
+	set_signal_thread(signal_handler);
+
 	ret = ipclib_init(argv[1], app_msg_handler);
 	if (ret < 0)
 		err_exit("ipclib_init error\n");
@@ -35,5 +55,6 @@ int main(int argc, char *argv[])
 	ipclib_watchdog_init(20);
 	ipclib_main_loop();
 	ipclib_deinit();
+	pr_info("main loop exit!\n");
 	return 0;
 }
