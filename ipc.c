@@ -35,7 +35,7 @@
 #include <sys/time.h>
 #include "debug.h"
 #include "looper.h"
-#include "ipclib.h"
+#include "ipc.h"
 #include "watchdog.h"
 #include "timer.h"
 
@@ -173,10 +173,10 @@ static void timer_callback(void *data)
 }
 
 /*
- * ipclib_watchdog_init - init watchdog settings
+ * ipc_watchdog_init - init watchdog settings
  * @second: init watchdog timeout time
  * */
-int ipclib_watchdog_init(int second)
+int ipc_watchdog_init(int second)
 {
 	struct ipc_lib *ipc = ipclib;
 
@@ -198,11 +198,11 @@ int ipclib_watchdog_init(int second)
 }
 
 /*
- * ipclib_watchdog_start - start watchdog timer
+ * ipc_watchdog_start - start watchdog timer
  *
- * Used internally by ipclib_main_loop
+ * Used internally by ipc_main_loop
  * */
-static int ipclib_watchdog_start(void)
+static int ipc_watchdog_start(void)
 {
 	struct ipc_lib *ipc = ipclib;
 	uint64_t usec;
@@ -226,12 +226,12 @@ static int ipclib_watchdog_start(void)
 }
 
 /*
- * ipclib_watchdog_feed - feed watchdog when receive watchdog message
+ * ipc_watchdog_feed - feed watchdog when receive watchdog message
  *
  * This function should be called from APP MSG HANDLER
  *
  * */
-int ipclib_watchdog_feed(void)
+int ipc_watchdog_feed(void)
 {
 	struct ipc_lib *ipc = ipclib;
 
@@ -246,9 +246,9 @@ int ipclib_watchdog_feed(void)
 
 
 /*
- * ipclib_watchdog_remove - remvoe watchdog timer
+ * ipc_watchdog_remove - remvoe watchdog timer
  * */
-static int ipclib_watchdog_remove(void)
+static int ipc_watchdog_remove(void)
 {
 	struct ipc_lib *ipc = ipclib;
 
@@ -263,11 +263,11 @@ static int ipclib_watchdog_remove(void)
 
 
 /*
-* ipclib_send_msg_async - send a async message
+* ipc_send_msg_async - send a async message
 * @name: app name
 * @msg: request message
 */
-int ipclib_send_msg_async(char *name, struct ipc_msg *msg)
+int ipc_send_msg_async(char *name, struct ipc_msg *msg)
 {
 	char path[MSG_QUEUE_NAME_SIZE] = {0};
 	mqd_t mqd;
@@ -282,11 +282,11 @@ int ipclib_send_msg_async(char *name, struct ipc_msg *msg)
 }
 
 /*
-* ipclib_send_msg_sync - send a sync message and will wait for reply
+* ipc_send_msg_sync - send a sync message and will wait for reply
 * @msg: request message
 * @reply: reply which need to send
 */
-int ipclib_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *reply)
+int ipc_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *reply)
 {
 	int bytes_read;
 	struct ipc_lib *ipc = ipclib;
@@ -316,7 +316,7 @@ int ipclib_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *repl
 
 	bytes_read = mq_send_msg_timeout(mqd, (void *)msg, sizeof(*msg));
 	if (bytes_read < 0) {
-		pr_err("ipclib_send_msg failed, %s\n", strerror(errno));
+		pr_err("ipc_send_msg failed, %s\n", strerror(errno));
 		return -1;
 	}
 
@@ -353,13 +353,13 @@ int ipclib_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *repl
 }
 
 /*
-* ipclib_send_reply - send a reply for a sync message
+* ipc_send_reply - send a reply for a sync message
 * @msg: request message
 * @reply: reply which need to send
 *
 * This function will set reply->type equal (msg->type + MSG_TYPE_REPLY_BASE)
 */
-int ipclib_send_reply(struct ipc_msg *msg, struct ipc_reply *reply)
+int ipc_send_reply(struct ipc_msg *msg, struct ipc_reply *reply)
 {
 	mqd_t mqd;
 
@@ -382,11 +382,11 @@ int ipclib_send_reply(struct ipc_msg *msg, struct ipc_reply *reply)
 }
 
 /**
-* ipclib_receive_msg - receive messages.
+* ipc_receive_msg - receive messages.
 * @ipc: ipclib structure point
 * @msg: note that it is a point to a point (struct ipc_msg **)
 */
-static int ipclib_receive_msg(struct ipc_lib *ipc, struct ipc_msg **msg)
+static int ipc_receive_msg(struct ipc_lib *ipc, struct ipc_msg **msg)
 {
 	int bytes_read = -1;
 	struct timespec expire_time;
@@ -414,11 +414,11 @@ static int ipclib_receive_msg(struct ipc_lib *ipc, struct ipc_msg **msg)
 }
 
 /**
-* ipclib_handle_reply - handle message reply.
+* ipc_handle_reply - handle message reply.
 * @ipc: ipclib structure point
 * @reply: ipc message reply point
 */
-static void ipclib_handle_reply(struct ipc_lib *ipc, struct ipc_reply *reply)
+static void ipc_handle_reply(struct ipc_lib *ipc, struct ipc_reply *reply)
 {
 	pthread_mutex_lock(&ipc->lock);
 	memcpy(&ipc->reply, reply, sizeof(struct ipc_reply));
@@ -427,11 +427,11 @@ static void ipclib_handle_reply(struct ipc_lib *ipc, struct ipc_reply *reply)
 }
 
 /**
-* ipclib_dispatcher - handle and post message.
+* ipc_dispatcher - handle and post message.
 * @ipc: ipclib structure point
 * @msg: ipc message point
 */
-static void ipclib_dispatcher(struct ipc_lib *ipc, struct ipc_msg *msg)
+static void ipc_dispatcher(struct ipc_lib *ipc, struct ipc_msg *msg)
 {
 	struct ipc_msg *data;
 
@@ -439,7 +439,7 @@ static void ipclib_dispatcher(struct ipc_lib *ipc, struct ipc_msg *msg)
 	* reply message don't need to post, handle it here.
 	*/
 	if (msg->type >= MSG_TYPE_REPLY_BASE) {
-		ipclib_handle_reply(ipc, (struct ipc_reply *)msg);
+		ipc_handle_reply(ipc, (struct ipc_reply *)msg);
 		return;
 	}
 
@@ -457,24 +457,24 @@ static void ipclib_dispatcher(struct ipc_lib *ipc, struct ipc_msg *msg)
 }
 
 /**
-* ipclib_free_msg_cb - message free callback used by looper.
-* @data: message point which malloced in ipclib_dispatcher()
+* ipc_free_msg_cb - message free callback used by looper.
+* @data: message point which malloced in ipc_dispatcher()
 *
 * This callback should set to looper, so looper will free message
 * memory after using it.
 */
-static void ipclib_free_msg_cb(void *data)
+static void ipc_free_msg_cb(void *data)
 {
 	if (data)
 		free(data);
 }
 
 /**
-* ipclib_main_loop - application wait and dispatcher/handle messages
+* ipc_main_loop - application wait and dispatcher/handle messages
 *
 * This function should never return unless exceptions occur.
 */
-void ipclib_main_loop(void)
+void ipc_main_loop(void)
 {
 	struct ipc_msg *msg;
 
@@ -482,13 +482,13 @@ void ipclib_main_loop(void)
 		pr_err("ipclib: should init first!\n");
 		return;
 	}
-	if (ipclib_watchdog_start() < 0) {
+	if (ipc_watchdog_start() < 0) {
 		pr_err("ipclib: watchdog start fail!\n");
 		return;
 	}
 
-	while (ipclib_receive_msg(ipclib, &msg) > 0){
-		ipclib_dispatcher(ipclib, msg);
+	while (ipc_receive_msg(ipclib, &msg) > 0){
+		ipc_dispatcher(ipclib, msg);
 	}
 
 	/**
@@ -497,9 +497,9 @@ void ipclib_main_loop(void)
 }
 
 /*
-* ipclib_stop_loop - stop main loop and exit the application
+* ipc_stop_loop - stop main loop and exit the application
 */
-void ipclib_stop_loop(void)
+void ipc_stop_loop(void)
 {
 	if (!ipclib) {
 		pr_err("ipclib: should init first!\n");
@@ -510,13 +510,13 @@ void ipclib_stop_loop(void)
 
 
 /*
-* ipclib_init - ipclib initialize
-* Applications should call this function before using ipclib_mainloop and ipclib_deinit
+* ipc_init - ipclib initialize
+* Applications should call this function before using ipc_mainloop and ipc_deinit
 *
 * @name: app name
 * @handler: data handle callback in looper thread
 */
-int ipclib_init(char *name, msg_handler handler)
+int ipc_init(char *name, msg_handler handler)
 {
 	struct ipc_lib *ipc;
 
@@ -543,7 +543,7 @@ int ipclib_init(char *name, msg_handler handler)
 		err_exit("ipclib: create message queue fail!\n");
 
 	/* create looper */
-	ipc->looper = looper_create(handler, ipclib_free_msg_cb, name);
+	ipc->looper = looper_create(handler, ipc_free_msg_cb, name);
 	if (ipc->looper < 0)
 		err_exit("ipclib: create looper fail!\n");
 
@@ -557,16 +557,16 @@ int ipclib_init(char *name, msg_handler handler)
 }
 
 /*
-* ipclib_deinit - ipclib de-initialize
+* ipc_deinit - ipclib de-initialize
 * Applications should call this function when exit
 */
-void ipclib_deinit(void)
+void ipc_deinit(void)
 {
 	if (!ipclib) {
 		pr_info("ipclib doesn't need to deinit\n");
 	}
 	/* remove timers */
-	ipclib_watchdog_remove();
+	ipc_watchdog_remove();
 	/* destory looper */
 	looper_destory(ipclib->looper);
 	/* delete msg queue */

@@ -7,7 +7,7 @@
 #include <signal.h>
 #include "siglib.h"
 #include "debug.h"
-#include "ipclib.h"
+#include "ipc.h"
 #include "daemon.h"
 
 static void signal_handler(int signo)
@@ -16,7 +16,7 @@ static void signal_handler(int signo)
 	case SIGINT:
 	case SIGTERM:
 		pr_info("signal received:%d\n", signo);
-		ipclib_stop_loop();
+		ipc_stop_loop();
 		break;
 	default:
 		break;
@@ -30,11 +30,11 @@ void app_msg_handler(void *data)
 	switch(msg->type) {
 	case MSG_TYPE_WATCHDOG:
 		pr_info("watchdog message received!\n");
-		ipclib_watchdog_feed();
+		ipc_watchdog_feed();
 		break;
 	default:
 		pr_info("unexpected message received! type:%d\n", msg->type);
-		ipclib_stop_loop();
+		ipc_stop_loop();
 		break;
 	}
 }
@@ -51,13 +51,13 @@ int main(int argc, char *argv[])
 	 * */
 	set_signal_thread(signal_handler);
 
-	ret = ipclib_init(argv[1], app_msg_handler);
+	ret = ipc_init(argv[1], app_msg_handler);
 	if (ret < 0)
-		err_exit("ipclib_init error\n");
+		err_exit("ipc_init error\n");
 
-	ipclib_watchdog_init(20);
-	ipclib_main_loop();
-	ipclib_deinit();
+	ipc_watchdog_init(20);
+	ipc_main_loop();
+	ipc_deinit();
 	pr_info("main loop exit!\n");
 	return 0;
 }

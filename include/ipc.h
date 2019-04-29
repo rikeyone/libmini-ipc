@@ -27,8 +27,8 @@
 export "C" {
 #endif
 
-#ifndef __IPCLIB_H__
-#define __IPCLIB_H__
+#ifndef __IPC_H__
+#define __IPC_H__
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -59,68 +59,68 @@ struct ipc_reply {
 };
 
 /*
- * ipclib_watchdog_init - init watchdog settings
+ * ipc_watchdog_init - init watchdog settings
  * @second: init watchdog timeout time
  * */
-int ipclib_watchdog_init(int second);
+int ipc_watchdog_init(int second);
 
 /*
- * ipclib_watchdog_feed - feed watchdog when receive watchdog message
+ * ipc_watchdog_feed - feed watchdog when receive watchdog message
  *
  * This function should be called from APP MSG HANDLER
  * */
-int ipclib_watchdog_feed(void);
+int ipc_watchdog_feed(void);
 
 /*
-* ipclib_send_msg_async - send a async message
+* ipc_send_msg_async - send a async message
 * @name: app name
 * @msg: request message
 */
-int ipclib_send_msg_async(char *name, struct ipc_msg *msg);
+int ipc_send_msg_async(char *name, struct ipc_msg *msg);
 
 /*
-* ipclib_send_msg_sync - send a sync message and will wait for reply
+* ipc_send_msg_sync - send a sync message and will wait for reply
 * @name: app name
 * @msg: request message
 * @reply: reply which need to send
 */
-int ipclib_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *reply);
+int ipc_send_msg_sync(char *name, struct ipc_msg *msg, struct ipc_reply *reply);
 
 /*
-* ipclib_send_reply - send a reply for a sync message
+* ipc_send_reply - send a reply for a sync message
 * @msg: request message
 * @reply: reply which need to send
 *
 * This function will set reply->type equal (msg->type + MSG_TYPE_REPLY_BASE)
 */
-int ipclib_send_reply(struct ipc_msg *msg, struct ipc_reply *reply);
+int ipc_send_reply(struct ipc_msg *msg, struct ipc_reply *reply);
 
 /**
-* ipclib_main_loop - application wait and dispatcher/handle messages
+* ipc_main_loop - application wait and dispatcher/handle messages
 *
 * This function should never return unless exceptions occur.
 */
-void ipclib_main_loop(void);
+void ipc_main_loop(void);
 
 /*
-* ipclib_stop_loop - stop main loop and exit the application
+* ipc_stop_loop - stop main loop and exit the application
 */
-void ipclib_stop_loop(void);
+void ipc_stop_loop(void);
 
 /*
-* ipclib_init - ipclib initialize
-* Applications should call this function before using ipclib_mainloop and ipclib_deinit
+* ipc_init - ipc initialize
+* Applications should call this function before using ipc_mainloop and ipc_deinit
 *
 * @name: app name
 * @handler: data handle callback in looper thread
 */
-int ipclib_init(char *name, msg_handler handler);
+int ipc_init(char *name, msg_handler handler);
 
 /*
-* ipclib_deinit - ipclib de-initialize
+* ipc_deinit - ipc de-initialize
 * Applications should call this function when exit
 */
-void ipclib_deinit(void);
+void ipc_deinit(void);
 
 
 /*
@@ -141,7 +141,7 @@ void ipclib_deinit(void);
 
 /* 0-8999: applications use */
 
-#endif //__IPCLIB_H__
+#endif //__IPC_H__
 
 #ifdef __cplusplus
 }
