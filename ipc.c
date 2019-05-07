@@ -24,6 +24,9 @@
  * SOFTWARE.
  */
 
+#define LOG_TAG "ipc"
+//#define LOG_DEBUG
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -449,7 +452,7 @@ static void ipc_dispatcher(struct ipc_lib *ipc, struct ipc_msg *msg)
 	*/
 	data = (struct ipc_msg *)malloc(sizeof(*data));
 	if (!data) {
-		pr_err("ipclib: ipc msg malloc fail\n");
+		pr_err("ipc msg malloc fail\n");
 		return;
 	}
 	memcpy(data, (void *)msg, sizeof(struct ipc_msg));
@@ -479,11 +482,11 @@ void ipc_main_loop(void)
 	struct ipc_msg *msg;
 
 	if (!ipclib) {
-		pr_err("ipclib: should init first!\n");
+		pr_err("should init first!\n");
 		return;
 	}
 	if (ipc_watchdog_start() < 0) {
-		pr_err("ipclib: watchdog start fail!\n");
+		pr_err("watchdog start fail!\n");
 		return;
 	}
 
@@ -502,7 +505,7 @@ void ipc_main_loop(void)
 void ipc_stop_loop(void)
 {
 	if (!ipclib) {
-		pr_err("ipclib: should init first!\n");
+		pr_err("should init first!\n");
 		return;
 	}
 	ipclib->exit = 1;
@@ -527,7 +530,7 @@ int ipc_init(char *name, msg_handler handler)
 
 	ipc = (struct ipc_lib *) malloc(sizeof(struct ipc_lib));
 	if (!ipc)
-		err_exit("ipclib: malloc fail!\n");
+		err_exit("malloc fail!\n");
 
 	memset(ipc, 0, sizeof(struct ipc_lib));
 	pthread_mutex_init(&ipc->lock, NULL);
@@ -535,21 +538,21 @@ int ipc_init(char *name, msg_handler handler)
 
 	/* fill msg queue path*/
 	snprintf(ipc->name, MSG_QUEUE_NAME_SIZE, "/%s", name);
-	pr_info("ipclib: create posix message queue at:%s\n", ipc->name);
+	pr_info("create posix message queue at:%s\n", ipc->name);
 
 	/* create msg queue */
 	ipc->mqd = mq_rw_create(ipc->name, MSG_QUEUE_MAX_SIZE);
 	if (ipc->mqd < 0)
-		err_exit("ipclib: create message queue fail!\n");
+		err_exit("create message queue fail!\n");
 
 	/* create looper */
 	ipc->looper = looper_create(handler, ipc_free_msg_cb, name);
 	if (ipc->looper < 0)
-		err_exit("ipclib: create looper fail!\n");
+		err_exit("create looper fail!\n");
 
 	/* start looper to handle message in looper thread */
 	if (ipc->looper->start(ipc->looper) < 0)
-		err_exit("ipclib: looper start fail!\n");
+		err_exit("looper start fail!\n");
 
 	/* set ipc to global point variable ipclib */
 	ipclib = ipc;

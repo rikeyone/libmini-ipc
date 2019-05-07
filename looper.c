@@ -24,6 +24,9 @@
  * SOFTWARE.
  */
 
+#define LOG_TAG "looper"
+//#define LOG_DEBUG
+
 #include <sys/types.h>
 #include <stdlib.h>
 #include <unistd.h>

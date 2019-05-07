@@ -33,10 +33,31 @@ export "C" {
 #include <stdio.h>
 #include <stdlib.h>
 
-#define pr_debug(fmt,...)   do{ printf("[%ld] DEBUG: "fmt,(long)getpid(),##__VA_ARGS__); fflush(stdout); }while(0)
-#define pr_info(fmt,...)    do{ printf("[%ld] INFO:  "fmt,(long)getpid(),##__VA_ARGS__); fflush(stdout); }while(0)
-#define pr_err(fmt,...)   	do{ printf("[%ld] ERROR: "fmt,(long)getpid(),##__VA_ARGS__); fflush(stdout); }while(0)
-#define err_exit(fmt,...)   do{ printf("[%ld] ERROR: "fmt,(long)getpid(),##__VA_ARGS__); exit(1); }while(0)
+#ifdef LOG_TAG
+
+#ifdef LOG_DEBUG
+#define pr_debug(fmt,...)   do{ printf("[%ld] DEBUG : %s - "fmt,(long)getpid(), LOG_TAG, ##__VA_ARGS__); fflush(stdout); }while(0)
+#else
+#define pr_debug(fmt,...)   do{ }while(0)
+#endif //LOG_DEBUG
+
+#define pr_info(fmt,...)    do{ printf("[%ld] INFO  : %s - "fmt,(long)getpid(), LOG_TAG, ##__VA_ARGS__); fflush(stdout); }while(0)
+#define pr_err(fmt,...)   	do{ printf("[%ld] ERROR : %s - "fmt,(long)getpid(), LOG_TAG, ##__VA_ARGS__); fflush(stdout); }while(0)
+#define err_exit(fmt,...)   do{ printf("[%ld] ERROR : %s - "fmt,(long)getpid(), LOG_TAG, ##__VA_ARGS__); exit(1); }while(0)
+
+#else
+
+#ifdef LOG_DEBUG
+#define pr_debug(fmt,...)   do{ printf("[%ld] DEBUG : "fmt,(long)getpid(),##__VA_ARGS__); fflush(stdout); }while(0)
+#else
+#define pr_debug(fmt,...)   do{ }while(0)
+#endif //LOG_DEBUG
+
+#define pr_info(fmt,...)    do{ printf("[%ld] INFO  : "fmt,(long)getpid(),##__VA_ARGS__); fflush(stdout); }while(0)
+#define pr_err(fmt,...)   	do{ printf("[%ld] ERROR : "fmt,(long)getpid(),##__VA_ARGS__); fflush(stdout); }while(0)
+#define err_exit(fmt,...)   do{ printf("[%ld] ERROR : "fmt,(long)getpid(),##__VA_ARGS__); exit(1); }while(0)
+
+#endif//LOG_TAG
 
 #endif //__DEBUG__
 
